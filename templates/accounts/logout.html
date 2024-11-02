@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Are you sure to logout?</h2>
+
+<hr>
+
+<form method="post">
+    {% csrf_token %}
+    <button class="btn btn-primary mt-2" type="submit">Yes</button>
+</form>
+
+<hr>
+
+<p><a href="{% url 'home' %}">No</a></p>
+
+{% endblock content %}

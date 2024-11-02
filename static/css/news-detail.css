@@ -1,0 +1,51 @@
+.img-container {
+    border-radius: 15px; /* Maintain original border radius */
+    width: 100%;
+    max-width: 800px;
+    height: auto; 
+    position: relative;
+    overflow: hidden; /* Ensures child elements don't exceed the border radius */
+    transition: transform 0.3s ease; /* Transition for smooth scaling */
+    margin-bottom: 10px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.img-container::before {
+    content: '';
+    display: block;
+    padding-top: 60%; /* Maintain 2:1 aspect ratio */
+}
+
+.img-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 5px; /* Add a 5px border radius to the image */
+    transition: transform 0.3s ease; /* Smooth transition for the image on hover */
+}
+
+.img-container:hover img {
+    transform: scale(1.25); /* Slightly scale the image on hover */
+}
+
+.title-text h3 {
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding-left: 10px;
+    border-left: 5px solid #acadad;
+    margin-bottom: 15px;
+}
+
+.article-info p {
+    margin: 0;
+    padding: 0;
+}
+
+.article-info{
+    padding-top: 20px;
+    padding-bottom: 20px;
+}

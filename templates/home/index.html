@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+{% if user.is_authenticated %}
+<h1>Hey, {{ user.username|capfirst }}</h1>
+{% else %}
+<h1>Welcome to KNews!</h1>
+{% endif %}
+
+<h4 class="pt-3">Stay Informed, Stay Updated</h4>
+
+<h1 class="text-center pt-4">Latest</h1>
+
+<div class="container">
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for article in latest_articles %}
+        <div class="col">
+            <div class="card h-100">
+                <img src="{{ article.image.url }}" class="card-img-top" alt="Article Image">
+                <div class="card-body d-flex flex-column">
+                    <p class="text-muted mb-1">{{ article.published_date|date:"F j, Y" }}</p>
+                    <h5 class="card-title">{{ article.title|truncatechars:100 }}</h5>
+                    <div class="mt-auto">
+                        <a href="{% url 'news_detail' article.pk %}" class="btn btn-primary">Read More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<br>
+<a href="{% url 'news_home' %}" class="btn btn-primary">Show All News</a>
+
+<hr>
+<h1 class="text-center pt-4">Site Reviews</h1>
+
+<div class="container">
+    <!-- Review Form -->
+    {% if user.is_authenticated %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Leave a Review</h5>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.rating.label_tag }} {{ form.rating }} <!-- This will show the rating field -->
+                {{ form.content.label_tag }} {{ form.content }} <!-- This will show the content textarea -->
+                <button type="submit" class="btn btn-primary mt-3">Submit Review</button>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <p class="text-center text-muted">Please <a href="{% url 'login' %}">log in</a> to leave a review.</p>
+    {% endif %}
+
+    <!-- Display Reviews -->
+    {% for review in latest_reviews %}
+    <div class="card my-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <h6 class="card-title mb-1">{{ review.content|capfirst }}</h6>
+                <!-- Display Rating with Stars -->
+                <div>
+                    {% for star in "12345" %}
+                        <span class="text-warning">
+                            {% if star <= review.rating|stringformat:"d" %}
+                                &#9733; <!-- Filled star -->
+                            {% else %}
+                                &#9734; <!-- Empty star -->
+                            {% endif %}
+                        </span>
+                    {% endfor %}
+                </div>
+            </div>
+            <p class="card-text text-muted mb-0">by <strong>{{ review.user }}</strong> on {{ review.published_date|date:"F j, Y" }}</p>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-center text-muted">No reviews yet. Be the first to review!</p>
+    {% endfor %}
+</div>
+
+{% endblock content %}
