@@ -16,27 +16,9 @@
   </div>
 
   <!-- Article Content -->
-  <!-- HTML -->
   <div class="article-content mb-5">
-    <div class="lead text-justify">
-      {{ article.content|safe|linebreaksbr }}
-    </div>
+    <p style="text-align: justify; font-size: large;">{{ article.content|linebreaksbr }}</p>
   </div>
-
-  <!-- CSS -->
-  <style>
-    .article-content .lead {
-      font-size: 1.3rem;
-      /* Adjust the size as needed */
-      line-height: 1.6;
-      /* Increase line height for better readability */
-      max-width: auto;
-      /* Set a max width to control line length */
-      margin: auto;
-      /* Center the content */
-    }
-  </style>
-
 
   <!-- Article Info Section -->
   <div class="article-info bg-light p-4 rounded shadow-sm">
@@ -44,7 +26,7 @@
       <!-- Author and Date -->
       <div>
         <span class="badge bg-primary">{{ article.author }}</span>
-        <small class="text-muted d-block">Published on {{ article.published_date|date:"F j, Y" }}</small>
+        <small class="text-muted d-block">{{ article.published_date|date:"F j, Y" }}</small>
       </div>
 
       <!-- Likes and Button -->
@@ -91,15 +73,14 @@
       <p class="text-center text-muted">Please <a href="{% url 'login' %}">log in</a> to leave a comment.</p>
       {% endif %}
 
-      <!-- Display Existing Comments -->
+      <!-- Display Comments -->
       <div class="comments-container">
         {% if comments %}
         {% for comment in comments %}
         <div class="card mb-3">
           <div class="card-body">
             <h6 class="card-title mb-1">{{ comment.content|capfirst }}</h6>
-            <p class="card-text text-muted mb-0">by <strong>{{ comment.user }}</strong> on {{ comment.created_at|date:"F
-              j, Y" }}</p>
+            <p class="card-text text-muted mb-0">by <strong>{{ comment.user }}</strong> on {{ comment.created_at|date:"F j, Y" }}</p>
           </div>
         </div>
         {% endfor %}
@@ -109,24 +90,10 @@
       </div>
     </div>
 
-    <!-- Related News Column -->
-    <div class="col-md-4">
-      <h4 class="my-4">Related News</h4>
-      {% for related_article in related_articles %}
-      <div class="col mt-2">
-        <div class="card h-100">
-          <img src="{{ related_article.image.url }}" class="card-img-top" alt="Article Image">
-          <div class="card-body d-flex flex-column">
-            <p class="text-muted mb-1">{{ related_article.published_date|date:"F j, Y" }}</p>
-            <h5 class="card-title">{{ related_article.title|truncatechars:100 }}</h5>
-            <div class="mt-auto">
-              <a href="{% url 'news_detail' related_article.pk %}" class="btn btn-primary">Read More</a>
-            </div>
-          </div>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
+    <!-- Related -->
+    <h2 class="text-center pt-4">Related News</h2>
+    {% include "partial/article_container.html" with article_list=related_articles %}
+
   </div>
 </div>
 

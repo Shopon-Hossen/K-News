@@ -4,6 +4,7 @@ from PIL import Image
 from taggit.managers import TaggableManager
 import os
 
+
 class NewsArticle(models.Model):
     title = models.CharField(max_length=100)
     content = models.TextField()
@@ -11,13 +12,14 @@ class NewsArticle(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='images/', default='default.jpg')
     tags = TaggableManager()
+    category = models.CharField(max_length=50, default="general")
 
     def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-
+        
         img = Image.open(self.image.path)
         
         target_width, target_height = 800, 500
@@ -41,7 +43,7 @@ class NewsArticle(models.Model):
         img.save(self.image.path, quality=75, optimize=True)
 
     def delete(self, *args, **kwargs):
-        if self.image and os.path.isfile(self.image.path):
+        if self.image and os.path.isfile(self.image.path) and self.image.name != 'default.jpg':
             os.remove(self.image.path)
         super().delete(*args, **kwargs)
 
@@ -63,3 +65,4 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'Comment by {self.user.username} on {self.article.title}'
+

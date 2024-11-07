@@ -4,19 +4,24 @@ from news.models import NewsArticle
 from .models import Review
 from .forms import ReviewForm
 from django.db.models import Count
-import datetime
 from django.utils import timezone
 
+def get_trending_news():
+    return NewsArticle.objects.filter(
+        published_date__gte=timezone.now()-timezone.timedelta(days=7)
+    ).annotate(likes_count=Count('likes')).filter(
+        likes_count__gte=1
+    ).order_by('-likes_count')
+
+
 def home_view(request: HttpRequest):
-    popular_articles = (
-        NewsArticle.objects
-        .annotate(like_count=Count('likes'))
-        .filter(like_count__gt=0)
-        .filter(published_date__gte=timezone.now() - datetime.timedelta(weeks=7))
-    )[:10]
-    
-    latest_articles = NewsArticle.objects.all().order_by("-published_date")[:10]
+    trending_list = get_trending_news()
+    most_liked_list = NewsArticle.objects.filter(
+        published_date__gte=timezone.now()-timezone.timedelta(days=7)
+    ).annotate(likes_count=Count('likes')).order_by('-likes_count')[:5]
+
     latest_reviews = Review.objects.all().order_by("-published_date")[:15]
+    category_list = ['business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'][:5]
 
     form = ReviewForm()
 
@@ -29,8 +34,9 @@ def home_view(request: HttpRequest):
             return redirect('home') 
 
     return render(request, "home/index.html", {
-        "latest_articles": latest_articles,
+        "category_list": category_list,
+        "trending_news": trending_list,
+        "most_liked_news": most_liked_list,
         "latest_reviews": latest_reviews,
-        "popular_articles": popular_articles,
         "form": form
     })

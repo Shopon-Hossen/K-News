@@ -7,15 +7,19 @@ import datetime
 from django.utils import timezone
 from django.db.models import Count
 
-
 def home_view(request: HttpRequest):
-    query = request.GET.get('q')
-    if query:
-        news_list = NewsArticle.objects.filter(Q(title__icontains=query) | Q(tags__name__icontains=query)).distinct().order_by('-published_date')[:100]
+    search_query = request.GET.get('q')
+    category_query = request.GET.get('category')
+
+    if category_query:
+        news_list = NewsArticle.objects.filter(category__iexact=category_query).order_by('-published_date')[:50]
+    elif search_query:
+        news_list = NewsArticle.objects.filter(Q(title__icontains=search_query) | Q(tags__name__icontains=search_query)).distinct().order_by('-published_date')[:100]
     else:
         news_list = NewsArticle.objects.order_by('-published_date')[:50]
 
-    return render(request, 'news/index.html', {"news_list": news_list, "query": query})
+    return render(request, 'news/index.html', {"news_list": news_list})
+
 
 def detail_view(request: HttpRequest, pk):
     article = get_object_or_404(NewsArticle, pk=pk)
@@ -49,7 +53,6 @@ def detail_view(request: HttpRequest, pk):
 
                 return redirect('news_detail', pk=article.pk)
 
-    print(related_articles)
     return render(request, 'news/detail.html', {
         'article': article,
         'comments': comments,
