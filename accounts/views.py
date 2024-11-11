@@ -3,6 +3,22 @@ from django.contrib.auth import logout, authenticate, login
 from .forms import UserRegistrationForm
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required
+from .forms import ProfileUpdateForm
+
+@login_required
+def profile_view(request):
+    profile = request.user.profile
+    
+    if request.method == 'POST':
+        form = ProfileUpdateForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('profile')
+    else:
+        form = ProfileUpdateForm(instance=profile)
+
+    return render(request, 'accounts/profile.html', {'form': form})
 
 def register_view(request):
     if request.method == 'POST':
@@ -16,6 +32,7 @@ def register_view(request):
     
     return render(request, 'accounts/register.html', {'form': form})
 
+@login_required
 def logout_view(request):
     if request.method == 'POST' and request.user.is_authenticated:
         logout(request)
@@ -26,21 +43,20 @@ def logout_view(request):
 
 def login_view(request):
     if request.method == 'POST':
-        form = AuthenticationForm(data=request.POST)  # Pass POST data to the form
+        form = AuthenticationForm(data=request.POST)
         if form.is_valid():
-            # Get the cleaned data
+
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
             
-            # Authenticate the user
             user = authenticate(request, username=username, password=password)
             if user is not None:
-                login(request, user)  # Log in the user
+                login(request, user)
                 messages.success(request, "Login successful.")
-                return redirect('home')  # Redirect to the home page or dashboard
+                return redirect('home')
             else:
-                messages.error(request, "Invalid username or password.")  # Handle invalid login
+                messages.error(request, "Invalid username or password.")
     else:
-        form = AuthenticationForm()  # Create an empty form for GET requests
+        form = AuthenticationForm()
     
     return render(request, 'accounts/login.html', {'form': form})

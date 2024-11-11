@@ -3,7 +3,13 @@ from django.contrib.auth.models import User
 from PIL import Image
 from taggit.managers import TaggableManager
 import os
+from django.utils.text import slugify
 
+class NewsCategory(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
 
 class NewsArticle(models.Model):
     title = models.CharField(max_length=100)
@@ -12,35 +18,39 @@ class NewsArticle(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='images/', default='default.jpg')
     tags = TaggableManager()
-    category = models.CharField(max_length=50, default="general")
+    category = models.ForeignKey(NewsCategory, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
+        if self.image and self.image.name != 'default.jpg':
+            file_extension = os.path.splitext(self.image.name)[1]
+            new_filename = slugify(self.title) + file_extension
+            self.image.name = f'{new_filename}'
+
         super().save(*args, **kwargs)
-        
-        img = Image.open(self.image.path)
-        
-        target_width, target_height = 800, 500
-        aspect_ratio = target_width / target_height
-        
-        img_ratio = img.width / img.height
 
-        if img_ratio > aspect_ratio:
-            new_width = int(aspect_ratio * img.height)
-            left = (img.width - new_width) / 2
-            right = (img.width + new_width) / 2
-            img = img.crop((left, 0, right, img.height))
-        elif img_ratio < aspect_ratio:
-            new_height = int(img.width / aspect_ratio)
-            top = (img.height - new_height) / 2
-            bottom = (img.height + new_height) / 2
-            img = img.crop((0, top, img.width, bottom))
+        if self.image:
+            img = Image.open(self.image.path)
 
-        img = img.resize((target_width, target_height), Image.LANCZOS)
-        
-        img.save(self.image.path, quality=75, optimize=True)
+            target_width, target_height = 800, 500
+            aspect_ratio = target_width / target_height
+            img_ratio = img.width / img.height
+
+            if img_ratio > aspect_ratio:
+                new_width = int(aspect_ratio * img.height)
+                left = (img.width - new_width) / 2
+                right = (img.width + new_width) / 2
+                img = img.crop((left, 0, right, img.height))
+            elif img_ratio < aspect_ratio:
+                new_height = int(img.width / aspect_ratio)
+                top = (img.height - new_height) / 2
+                bottom = (img.height + new_height) / 2
+                img = img.crop((0, top, img.width, bottom))
+
+            img = img.resize((target_width, target_height), Image.LANCZOS)
+            img.save(self.image.path, quality=75, optimize=True)
 
     def delete(self, *args, **kwargs):
         if self.image and os.path.isfile(self.image.path) and self.image.name != 'default.jpg':
@@ -57,12 +67,11 @@ class NewsArticleLike(models.Model):
     def __str__(self):
         return f'{self.user.username} likes {self.article.title}'
 
-class Comment(models.Model):
+class NewsArticleComment(models.Model):
     article = models.ForeignKey(NewsArticle, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField(max_length=300)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'Comment by {self.user.username} on {self.article.title}'
-
+        return f'{self.user.username} | {self.article.title}'

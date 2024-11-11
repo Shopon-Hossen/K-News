@@ -8,18 +8,16 @@
 <h1>Welcome to K-News!</h1>
 {% endif %}
 
-<!-- Category -->
+<!-- Category Navigation Bar -->
 <nav class="navbar navbar-expand-lg bg-light">
     <div class="container-fluid">
-        <ul class="navbar-nav flex-row flex-nowrap overflow-auto">
+        <div class="navbar-nav flex-row flex-nowrap overflow-auto">
             {% for category in category_list %}
-                <li class="nav-item me-3">
-                    <a class="nav-link" href="{% url 'news_home' %}?category={{ category }}">
-                        {{ category|capfirst }}
-                    </a>
-                </li>
+            <a class="nav-item nav-link me-3" href="{% url 'news_home' %}?category={{ category }}">
+                {{ category|capfirst}}
+            </a>
             {% endfor %}
-        </ul>
+        </div>
     </div>
 </nav>
 

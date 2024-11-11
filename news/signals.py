@@ -5,4 +5,4 @@ from .models import NewsArticle
 
 @receiver(post_delete, sender=NewsArticle)
 def model_deleted(sender, instance, **kwargs):
-    pass
+    print(instance)

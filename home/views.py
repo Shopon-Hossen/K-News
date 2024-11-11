@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
-from django.http import HttpRequest
-from news.models import NewsArticle
+from django.http import HttpRequest, HttpResponse
+from news.models import NewsArticle, NewsCategory
 from .models import Review
 from .forms import ReviewForm
 from django.db.models import Count
 from django.utils import timezone
+
 
 def get_trending_news():
     return NewsArticle.objects.filter(
@@ -21,7 +22,7 @@ def home_view(request: HttpRequest):
     ).annotate(likes_count=Count('likes')).order_by('-likes_count')[:5]
 
     latest_reviews = Review.objects.all().order_by("-published_date")[:15]
-    category_list = ['business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'][:5]
+    category_list = NewsCategory.objects.all()
 
     form = ReviewForm()
 
