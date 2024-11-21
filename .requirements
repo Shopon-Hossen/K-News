@@ -1,0 +1,10 @@
+﻿Django
+psycopg2
+psycopg2-binary
+pillow
+python-decouple
+crispy-bootstrap4
+django-crispy-forms
+django-dotenv
+django-taggit
+django_htmx
